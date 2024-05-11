@@ -14,9 +14,10 @@ where
 }
 
 macro_rules! model {
-    ( $name:ident $( :$endpoint:literal )?; $( $( :$field_doc:literal )? $field_name:ident: $field_type:ty $( = $rename:literal )? $( => $deserialize_fn:literal )? ),* $(,)? ) => {
+    ( :$struct_doc:literal $name:ident $( :$endpoint:literal )?; $( $( :$field_doc:literal )? $field_name:ident: $field_type:ty $( = $rename:literal )? $( => $deserialize_fn:literal )? ),* $(,)? ) => {
         #[derive(serde::Deserialize, Debug, PartialEq, PartialOrd, Clone)]
         #[serde(rename_all = "snake_case")]
+        #[doc = $struct_doc]
         pub struct $name {
             $(
                 $( #[doc = $field_doc] )?
@@ -37,7 +38,11 @@ macro_rules! model {
 }
 
 macro_rules! args_model {
-    ( $name:ident: $target:ident; $( $( :$field_doc:literal )? $field_name:ident: $field_type:ty $( = $serialized_name:literal )? ),* $(,)? ) => {
+    (
+        $name:ident: $target:ident;
+        $( $( :$field_doc:literal )?
+        $field_name:ident: $field_type:ty $( = $serialized_name:literal )? ),* $(,)?
+    ) => {
         #[derive(serde::Serialize, Debug, PartialEq, PartialOrd, Clone)]
         pub struct $name {
             $(
@@ -46,54 +51,15 @@ macro_rules! args_model {
             )*
         }
 
-        impl From<($($field_type),*)> for $name {
-            fn from(value: ($($field_type),*)) -> Self {
-                let ($($field_name),+) = value;
-                Self {
-                    $( $field_name ),*
-                }
-            }
-        }
+        crate::args_model!( @from_tuple_for_type $name: $target; $( $field_name: $field_type ),* );
 
-        impl From<$name> for RequestContext<$target> {
-            fn from(value: $name) -> Self {
-                let $name { $($field_name),+ } = value;
-                RequestContext::from((
-                    Body::from(
-                        json!(
-                        {
-                            $( crate::args_model!(@json $field_name $( $serialized_name )?): $field_name ),*
-                            // $( stringify!($field_name): $field_name ),*Y
+        crate::args_model!( @impl_from_type $name: $target; $($field_name: $field_type $( = $serialized_name )? ),*);
+        crate::args_model!( @impl_from_tuple $name: $target; $($field_name: $field_type $( = $serialized_name )? ),*);
 
-                        }
-                        )
-                        .to_string(),
-                    ),
-                    Default::default(),
-                ))
-            }
-        }
 
-        impl From<($($field_type),*)> for RequestContext<$target> {
-            fn from(value: ($($field_type),*)) -> Self {
-                let ($($field_name),+) = value;
-                RequestContext::from((
-                    Body::from(
-                        json!(
-                        {
-                            $( crate::args_model!(@json $field_name $( $serialized_name )?): $field_name ),*
-                            // $( stringify!($field_name): $field_name ),*Y
-
-                        }
-                        )
-                        .to_string(),
-                    ),
-                    Default::default(),
-                ))
-            }
-        }
     };
 
+    // JSON -----------------------------------------------
     ( @json $field_name:ident ) => {
         stringify!($field_name)
     };
@@ -102,7 +68,120 @@ macro_rules! args_model {
         stringify!($serialized_name)
     };
 
+    // -----------------------------------------
+    //  From Type -----------------------------------------
+    // EMPTY FIELDS
+    (
+        @impl_from_type
+        $name:ident: $target:ident;
+    ) => {};
+
+    // EXISTING FIELDS
+    (
+        @impl_from_type
+        $name:ident: $target:ident;
+        $( $field_name:ident: $field_type:ty $( = $serialized_name:literal )? ),*
+    ) => {
+        impl From<$name> for crate::models::base::RequestContext<$target> {
+            fn from(value: $name) -> Self {
+                let $name { $($field_name),+ } = value;
+                crate::models::base::RequestContext::from((
+                    reqwest::Body::from(
+                        serde_json::json!(
+                        {
+                            $( crate::args_model!(@json $field_name $( $serialized_name )?): $field_name ),*
+                        }
+                        )
+                        .to_string(),
+                    ),
+                    Default::default(),
+                    Default::default(),
+                ))
+            }
+        }
+    };
+
+
+    // -----------------------------------------
+    // RequestContext from Tuple --------------------------
+    // EMPTY FIELDS
+    (
+        @impl_from_tuple
+        $name:ident: $target:ident;
+    ) => {};
+
+    // EXISTING FIELDS
+    (
+        @impl_from_tuple
+        $name:ident: $target:ident;
+        $( $field_name:ident: $field_type:ty $( = $serialized_name:literal )? ),*
+    ) => {
+        impl From<($($field_type),*)> for crate::models::base::RequestContext<$target> {
+            fn from(value: ($($field_type),*)) -> Self {
+                let ($($field_name),+) = value;
+                crate::models::base::RequestContext::from((
+                    reqwest::Body::from(
+                        serde_json::json!(
+                        {
+                            $( crate::args_model!(@json $field_name $( $serialized_name )?): $field_name ),*
+                        }
+                        )
+                        .to_string(),
+                    ),
+                    Default::default(),
+                    Default::default(),
+                ))
+            }
+        }
+    };
+
+    // -----------------------------------------
+    //  From Tuple for Type -------------------------------
+    // EMPTY FIELDS
+    (
+        @from_tuple_for_type
+        $name:ident: $target:ident;
+    ) => {
+        impl From<crate::models::base::NoArgs> for $name {
+            fn from(_val: crate::models::base::NoArgs) -> Self {
+                Self {}
+            }
+        }
+        impl From<crate::models::base::NoArgs> for crate::models::base::RequestContext<$target> {
+            fn from(_val: crate::models::base::NoArgs) -> Self {
+                crate::models::base::RequestContext::new()
+            }
+        }
+    };
+
+    // EXISTING FIELDS
+    (
+        @from_tuple_for_type
+        $name:ident: $target:ident;
+        $( $field_name:ident: $field_type:ty ),*
+    ) => {
+        impl From<($($field_type),*)> for $name {
+            fn from(value: ($($field_type),*)) -> Self {
+                let ($($field_name),+) = value;
+                Self {
+                    $( $field_name ),*
+                }
+            }
+        }
+    };
+
+}
+
+macro_rules! impl_noargs {
+    ( $target:ident ) => {
+        impl From<crate::models::base::NoArgs> for crate::models::base::RequestContext<$target> {
+            fn from(_val: crate::models::base::NoArgs) -> Self {
+                crate::models::base::RequestContext::new()
+            }
+        }
+    };
 }
 
 pub(crate) use args_model;
+pub(crate) use impl_noargs;
 pub(crate) use model;

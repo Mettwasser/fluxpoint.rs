@@ -1,7 +1,9 @@
-use super::macros::model;
+use crate::models::macros::model;
 
 model! {
+    :"The Error Response given by the API itself."
     ApiError;
+
     :"Whether the response was successful or not"
     success: bool,
 
