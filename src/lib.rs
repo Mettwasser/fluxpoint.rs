@@ -2,13 +2,13 @@ pub mod client;
 pub mod error;
 pub mod models;
 
-pub(crate) use crate::models::macros::args_model;
-
-pub mod prelude {
-    pub use crate::{
-        client::{Client, FluxpointApiToken},
-        models::{base::NoArgs, dad_joke::DadJoke},
-    };
+#[cfg(feature = "imagegen")]
+pub mod imagegen {
+    pub use crate::models::imagegen::*;
 }
 
-pub use reqwest;
+pub(crate) use crate::models::core::macros::args_model;
+
+pub mod prelude {
+    pub use crate::client::{Client, FluxpointApiToken};
+}

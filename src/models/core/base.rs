@@ -8,10 +8,6 @@ pub trait Endpoint {
     fn endpoint() -> &'static str;
 }
 
-pub trait JsonFromFields {
-    fn get_json(&self) -> serde_json::Value;
-}
-
 pub struct RequestContext<T: Endpoint> {
     pub body: Body,
     pub headers: HeaderMap,

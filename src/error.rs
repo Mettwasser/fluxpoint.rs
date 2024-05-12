@@ -1,4 +1,4 @@
-use crate::models::macros::model;
+use crate::models::core::macros::model;
 
 model! {
     :"The Error Response given by the API itself."

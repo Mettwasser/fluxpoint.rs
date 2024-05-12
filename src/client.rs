@@ -3,7 +3,7 @@ use serde::Deserialize;
 use std::borrow::{Borrow, Cow};
 
 use crate::error::{ApiError, Error};
-use crate::models::base::{Endpoint, RequestContext};
+use crate::models::core::{Endpoint, RequestContext};
 
 /// Wrapper for a Fluxpoint API token.
 #[derive(From, PartialEq)]

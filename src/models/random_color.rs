@@ -1,4 +1,4 @@
-use super::macros::{impl_noargs, model};
+use super::core::{impl_noargs, model};
 
 model! {
     :"A Random color"
@@ -25,7 +25,7 @@ impl_noargs!(RandomColor);
 #[cfg(test)]
 mod test {
     use super::RandomColor;
-    use crate::{client::Client, error::Error, models::base::NoArgs};
+    use crate::{client::Client, error::Error, models::core::NoArgs};
 
     #[tokio::test]
     async fn test_randomcolor() -> Result<(), Error> {

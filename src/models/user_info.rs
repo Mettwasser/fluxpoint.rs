@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc};
 
-use super::macros::{impl_noargs, model};
+use super::core::{impl_noargs, model};
 
 model! {
     :"The UserInfo associated with the API Token"
@@ -14,7 +14,7 @@ impl_noargs!(UserInfo);
 #[cfg(test)]
 mod test {
     use super::UserInfo;
-    use crate::{client::Client, error::Error, models::base::NoArgs};
+    use crate::{client::Client, error::Error, models::core::NoArgs};
 
     #[tokio::test]
     async fn test_userinfo() -> Result<(), Error> {

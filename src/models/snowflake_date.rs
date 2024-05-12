@@ -1,7 +1,4 @@
-use super::{
-    cs_datetime_format::CSDateTimeFormat,
-    macros::{args_model, model},
-};
+use super::core::{args_model, model, CSDateTimeFormat};
 
 model! {
     :"A Date(Time) string from a Discord Snowflake (ID)"
@@ -18,7 +15,7 @@ args_model! {
 #[cfg(test)]
 mod test {
     use super::SnowflakeDate;
-    use crate::{client::Client, error::Error, models::cs_datetime_format::CSDateTimeFormat};
+    use crate::{client::Client, error::Error, models::core::CSDateTimeFormat};
 
     #[tokio::test]
     async fn test_snowflakedate() -> Result<(), Error> {

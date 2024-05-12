@@ -28,7 +28,7 @@ macro_rules! model {
         }
 
         $(
-            impl $crate::models::base::Endpoint for $name {
+            impl $crate::models::core::Endpoint for $name {
                 fn endpoint() -> &'static str {
                     concat!("https://api.fluxpoint.dev", $endpoint)
                 }
@@ -82,10 +82,10 @@ macro_rules! args_model {
         $name:ident: $target:ident;
         $( $field_name:ident: $field_type:ty $( = $serialized_name:literal )? ),*
     ) => {
-        impl From<$name> for crate::models::base::RequestContext<$target> {
+        impl From<$name> for crate::models::core::RequestContext<$target> {
             fn from(value: $name) -> Self {
                 let $name { $($field_name),+ } = value;
-                crate::models::base::RequestContext::from((
+                crate::models::core::RequestContext::from((
                     reqwest::Body::from(
                         serde_json::json!(
                         {
@@ -116,10 +116,10 @@ macro_rules! args_model {
         $name:ident: $target:ident;
         $( $field_name:ident: $field_type:ty $( = $serialized_name:literal )? ),*
     ) => {
-        impl From<($($field_type),*)> for crate::models::base::RequestContext<$target> {
+        impl From<($($field_type),*)> for crate::models::core::RequestContext<$target> {
             fn from(value: ($($field_type),*)) -> Self {
                 let ($($field_name),+) = value;
-                crate::models::base::RequestContext::from((
+                crate::models::core::RequestContext::from((
                     reqwest::Body::from(
                         serde_json::json!(
                         {
@@ -142,14 +142,14 @@ macro_rules! args_model {
         @from_tuple_for_type
         $name:ident: $target:ident;
     ) => {
-        impl From<crate::models::base::NoArgs> for $name {
-            fn from(_val: crate::models::base::NoArgs) -> Self {
+        impl From<crate::models::core::NoArgs> for $name {
+            fn from(_val: crate::models::core::NoArgs) -> Self {
                 Self {}
             }
         }
-        impl From<crate::models::base::NoArgs> for crate::models::base::RequestContext<$target> {
-            fn from(_val: crate::models::base::NoArgs) -> Self {
-                crate::models::base::RequestContext::new()
+        impl From<crate::models::core::NoArgs> for crate::models::core::RequestContext<$target> {
+            fn from(_val: crate::models::core::NoArgs) -> Self {
+                crate::models::core::RequestContext::new()
             }
         }
     };
@@ -174,9 +174,9 @@ macro_rules! args_model {
 
 macro_rules! impl_noargs {
     ( $target:ident ) => {
-        impl From<crate::models::base::NoArgs> for crate::models::base::RequestContext<$target> {
-            fn from(_val: crate::models::base::NoArgs) -> Self {
-                crate::models::base::RequestContext::new()
+        impl From<crate::models::core::NoArgs> for crate::models::core::RequestContext<$target> {
+            fn from(_val: crate::models::core::NoArgs) -> Self {
+                crate::models::core::RequestContext::new()
             }
         }
     };

@@ -1,4 +1,4 @@
-use super::macros::{impl_noargs, model};
+use super::core::{impl_noargs, model};
 
 model! {
     :"A random dad joke"
@@ -11,7 +11,7 @@ impl_noargs!(DadJoke);
 #[cfg(test)]
 mod test {
     use super::DadJoke;
-    use crate::{client::Client, error::Error, models::base::NoArgs};
+    use crate::{client::Client, error::Error, models::core::NoArgs};
 
     #[tokio::test]
     async fn test_dadjoke() -> Result<(), Error> {
