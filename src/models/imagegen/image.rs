@@ -5,8 +5,11 @@ use super::image_builder::ImageBuilder;
 #[derive(Debug, PartialEq, PartialOrd, serde::Serialize)]
 pub struct Image {
     pub(crate) image_type: ImageType,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) width: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) height: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) size: Option<u32>,
     pub(crate) color: String,
     pub(crate) round: u32,

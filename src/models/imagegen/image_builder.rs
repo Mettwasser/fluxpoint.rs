@@ -42,6 +42,35 @@ impl ImageBuilder<__NoImageType, __NoImageDimensions> {
             y: self.y,
         }
     }
+
+    pub fn dimensions(
+        self,
+        dimensions: ImageDimensions,
+    ) -> ImageBuilder<__NoImageType, __ImageDimensions> {
+        ImageBuilder {
+            dimensions: __ImageDimensions(dimensions),
+            image_type: self.image_type,
+            color: self.color,
+            round: self.round,
+            skip: self.skip,
+            x: self.x,
+            y: self.y,
+        }
+    }
+}
+
+impl ImageBuilder<__NoImageType, __ImageDimensions> {
+    pub fn image_type(self, image_type: ImageType) -> ImageBuilder<__ImageType, __ImageDimensions> {
+        ImageBuilder {
+            image_type: __ImageType(image_type),
+            color: self.color,
+            dimensions: self.dimensions,
+            round: self.round,
+            skip: self.skip,
+            x: self.x,
+            y: self.y,
+        }
+    }
 }
 
 impl ImageBuilder<__ImageType, __NoImageDimensions> {
@@ -112,6 +141,8 @@ impl ImageBuilder<__ImageType, __ImageDimensions> {
 #[cfg(test)]
 mod test {
 
+    use serde_json::json;
+
     use crate::models::Color;
 
     use crate::models::imagegen::{Image, ImageType};
@@ -119,7 +150,7 @@ mod test {
     use super::ImageDimensions;
 
     #[test]
-    fn test_builder() {
+    fn test_image_builder() {
         let image = Image::builder()
             .image_type(ImageType::Bitmap)
             .dimensions(ImageDimensions::Size(69))
@@ -140,5 +171,19 @@ mod test {
                 skip: false
             }
         )
+    }
+
+    #[test]
+    fn test_image_builder_json() {
+        let image = Image::builder()
+            .image_type(ImageType::Bitmap)
+            .dimensions(ImageDimensions::Size(69))
+            .color(Color::RGB(255, 0, 0))
+            .build();
+
+        assert_eq!(
+            serde_json::to_value(image).unwrap(),
+            json!({"image_type": "bitmap", "size": 69, "color": "255,0,0", "round": 0, "x": 0, "y": 0, "skip": false})
+        );
     }
 }
