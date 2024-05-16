@@ -33,6 +33,12 @@ pub enum Color {
     Name(String),
 }
 
+// impl Default for Color {
+//     fn default() -> Self {
+//         Color::RGB(0, 0, 0)
+//     }
+// }
+
 pub struct ColorInfoArgs {
     search_by: Color,
 }

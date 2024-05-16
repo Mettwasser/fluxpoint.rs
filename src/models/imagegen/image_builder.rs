@@ -8,6 +8,7 @@ use super::macros::state;
 state! {
     ImageType;
     ImageDimensions;
+    Option<Color>;
 }
 
 #[derive(Default, Debug, PartialEq, PartialOrd, serde::Serialize)]
@@ -176,8 +177,8 @@ mod test {
     #[test]
     fn test_image_builder_json() {
         let image = Image::builder()
-            .image_type(ImageType::Bitmap)
             .dimensions(ImageDimensions::Size(69))
+            .image_type(ImageType::Bitmap)
             .color(Color::RGB(255, 0, 0))
             .build();
 

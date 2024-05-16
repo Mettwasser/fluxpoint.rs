@@ -1,0 +1,33 @@
+{
+    "Base": {
+        "type": "bitmap",
+        "width": 2000,
+        "height": 2000,
+        "color": "#7289da"
+    },
+    "Images": [
+        {
+            "type": "url",
+            "url": "https://img.fluxpoint.dev/thm/1422436083957760.jpg",
+            "width": 1000,
+            "height": 1000
+        },
+        {
+            "type": "bitmap",
+            "round": 160,
+            "x": 20,
+            "y": 240,
+            "width": 1220,
+            "height": 360,
+            "color": "0,0,0,80"
+        }
+    ],
+    "Texts": [
+        {
+            "text": "Hello",
+            "size": 120,
+            "x": 600,
+            "y": 1060
+        }
+    ]
+}

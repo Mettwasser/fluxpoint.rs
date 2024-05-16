@@ -8,6 +8,7 @@ pub mod imagegen {
 }
 
 pub(crate) use crate::models::core::macros::args_model;
+pub(crate) use crate::models::imagegen::macros::state;
 
 pub mod prelude {
     pub use crate::client::{Client, FluxpointApiToken};
