@@ -8,23 +8,23 @@ use super::macros::state;
 state! {
     ImageType;
     ImageDimensions;
-    Option<Color>;
+    String : Color;
 }
 
 #[derive(Default, Debug, PartialEq, PartialOrd, serde::Serialize)]
-pub struct ImageBuilder<ImageType, Dimensions> {
+pub struct ImageBuilder<ImageType, Dimensions, Color> {
     image_type: ImageType,
 
     dimensions: Dimensions,
 
-    color: Option<Color>,
+    color: Color,
     round: u32,
     x: u32,
     y: u32,
     skip: bool,
 }
 
-impl ImageBuilder<__NoImageType, __NoImageDimensions> {
+impl ImageBuilder<__NoImageType, __NoImageDimensions, __NoColor> {
     pub fn new() -> Self {
         Default::default()
     }
@@ -32,7 +32,7 @@ impl ImageBuilder<__NoImageType, __NoImageDimensions> {
     pub fn image_type(
         self,
         image_type: ImageType,
-    ) -> ImageBuilder<__ImageType, __NoImageDimensions> {
+    ) -> ImageBuilder<__ImageType, __NoImageDimensions, __NoColor> {
         ImageBuilder {
             image_type: __ImageType(image_type),
             color: self.color,
@@ -47,7 +47,7 @@ impl ImageBuilder<__NoImageType, __NoImageDimensions> {
     pub fn dimensions(
         self,
         dimensions: ImageDimensions,
-    ) -> ImageBuilder<__NoImageType, __ImageDimensions> {
+    ) -> ImageBuilder<__NoImageType, __ImageDimensions, __NoColor> {
         ImageBuilder {
             dimensions: __ImageDimensions(dimensions),
             image_type: self.image_type,
@@ -60,8 +60,11 @@ impl ImageBuilder<__NoImageType, __NoImageDimensions> {
     }
 }
 
-impl ImageBuilder<__NoImageType, __ImageDimensions> {
-    pub fn image_type(self, image_type: ImageType) -> ImageBuilder<__ImageType, __ImageDimensions> {
+impl ImageBuilder<__NoImageType, __ImageDimensions, __NoColor> {
+    pub fn image_type(
+        self,
+        image_type: ImageType,
+    ) -> ImageBuilder<__ImageType, __ImageDimensions, __NoColor> {
         ImageBuilder {
             image_type: __ImageType(image_type),
             color: self.color,
@@ -74,11 +77,11 @@ impl ImageBuilder<__NoImageType, __ImageDimensions> {
     }
 }
 
-impl ImageBuilder<__ImageType, __NoImageDimensions> {
+impl ImageBuilder<__ImageType, __NoImageDimensions, __NoColor> {
     pub fn dimensions(
         self,
         dimensions: ImageDimensions,
-    ) -> ImageBuilder<__ImageType, __ImageDimensions> {
+    ) -> ImageBuilder<__ImageType, __ImageDimensions, __NoColor> {
         ImageBuilder {
             dimensions: __ImageDimensions(dimensions),
             image_type: self.image_type,
@@ -91,11 +94,45 @@ impl ImageBuilder<__ImageType, __NoImageDimensions> {
     }
 }
 
-impl ImageBuilder<__ImageType, __ImageDimensions> {
-    pub fn color(mut self, color: Color) -> Self {
-        self.color = Some(color);
-        self
+impl ImageBuilder<__ImageType, __ImageDimensions, __NoColor> {
+    pub fn color(self, color: Color) -> ImageBuilder<__ImageType, __ImageDimensions, __Color> {
+        let color = color.to_string();
+        ImageBuilder {
+            color: __Color(color),
+            dimensions: self.dimensions,
+            image_type: self.image_type,
+            round: self.round,
+            skip: self.skip,
+            x: self.x,
+            y: self.y,
+        }
     }
+
+    pub fn build(self) -> Image {
+        let mut width = None;
+        let mut height = None;
+        let mut size = None;
+
+        match self.dimensions.0 {
+            ImageDimensions::Size(n) => size = Some(n),
+            ImageDimensions::XY(x, y) => (width, height) = (Some(x), Some(y)),
+        }
+
+        Image {
+            image_type: self.image_type.0,
+            width,
+            height,
+            size,
+            color: String::new(),
+            round: self.round,
+            x: self.x,
+            y: self.y,
+            skip: self.skip,
+        }
+    }
+}
+
+impl<C> ImageBuilder<__ImageType, __ImageDimensions, C> {
     pub fn x(mut self, n: u32) -> Self {
         self.x = n;
         self
@@ -119,18 +156,12 @@ impl ImageBuilder<__ImageType, __ImageDimensions> {
             ImageDimensions::XY(x, y) => (width, height) = (Some(x), Some(y)),
         }
 
-        let color = if let Some(color) = self.color {
-            color.to_string()
-        } else {
-            String::new()
-        };
-
         Image {
             image_type: self.image_type.0,
             width,
             height,
             size,
-            color,
+            color: self.color.0,
             round: self.round,
             x: self.x,
             y: self.y,
@@ -181,6 +212,8 @@ mod test {
             .image_type(ImageType::Bitmap)
             .color(Color::RGB(255, 0, 0))
             .build();
+
+        let x = Image::builder().dimensions(ImageDimensions::Size(31)).image_type(ImageType::Bitmap).
 
         assert_eq!(
             serde_json::to_value(image).unwrap(),

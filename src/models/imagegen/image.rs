@@ -1,6 +1,6 @@
 use crate::imagegen::{ImageType, __NoImageDimensions, __NoImageType};
 
-use super::image_builder::ImageBuilder;
+use super::image_builder::{ImageBuilder, __NoColor};
 
 #[derive(Debug, PartialEq, PartialOrd, serde::Serialize)]
 pub struct Image {
@@ -19,7 +19,7 @@ pub struct Image {
 }
 
 impl Image {
-    pub fn builder() -> ImageBuilder<__NoImageType, __NoImageDimensions> {
+    pub fn builder() -> ImageBuilder<__NoImageType, __NoImageDimensions, __NoColor> {
         ImageBuilder::new()
     }
 }
